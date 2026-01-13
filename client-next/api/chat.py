@@ -6,19 +6,24 @@ genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 model = genai.GenerativeModel("gemini-1.5-pro")
 
 def handler(request):
-    if request.method != "POST":
+    # ✅ Vercel request is dict-like
+    method = request.get("method")
+
+    if method != "POST":
         return {
             "statusCode": 405,
+            "headers": {"Content-Type": "application/json"},
             "body": json.dumps({"error": "Method not allowed"})
         }
 
     try:
-        body = json.loads(request.body or "{}")
+        body = json.loads(request.get("body") or "{}")
         query = body.get("query", "").strip()
 
         if not query:
             return {
                 "statusCode": 200,
+                "headers": {"Content-Type": "application/json"},
                 "body": json.dumps({"response": ""})
             }
 
@@ -26,16 +31,13 @@ def handler(request):
 
         return {
             "statusCode": 200,
-            "headers": {
-                "Content-Type": "application/json"
-            },
-            "body": json.dumps({
-                "response": response.text
-            })
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({"response": response.text})
         }
 
     except Exception as e:
         return {
             "statusCode": 500,
+            "headers": {"Content-Type": "application/json"},
             "body": json.dumps({"error": str(e)})
         }
