@@ -2,12 +2,14 @@ import json
 import os
 import google.generativeai as genai
 
+# Configure Gemini
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 model = genai.GenerativeModel("gemini-1.5-pro")
 
 def handler(request):
-    # ✅ Vercel request is dict-like
-    method = request.get("method")
+    # request is a dict from Vercel
+    method = request.get("method", "").upper()
+    body = request.get("body", "{}")
 
     if method != "POST":
         return {
@@ -17,8 +19,8 @@ def handler(request):
         }
 
     try:
-        body = json.loads(request.get("body") or "{}")
-        query = body.get("query", "").strip()
+        data = json.loads(body)
+        query = data.get("query", "").strip()
 
         if not query:
             return {
@@ -27,6 +29,7 @@ def handler(request):
                 "body": json.dumps({"response": ""})
             }
 
+        # Generate content
         response = model.generate_content(query)
 
         return {
