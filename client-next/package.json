@@ -15,15 +15,16 @@
     "framer-motion": "^11.11.1",
     "gsap": "^3.12.5",
     "lenis": "^1.1.14",
-    "next": "14.2.13",
+    "next": "^14.2.35",
     "next-videos": "1.4.1",
     "react": "^18",
     "react-dom": "^18",
-    "react-use-measure": "^2.1.1"
+    "react-use-measure": "^2.1.1",
+    "vercel": "^25.2.0"
   },
   "devDependencies": {
     "eslint": "^8",
-    "eslint-config-next": "14.2.13"
+    "eslint-config-next": "^16.1.1"
   },
   "packageManager": "yarn@4.5.0"
 }

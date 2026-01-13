@@ -57,9 +57,10 @@ export default function ChatbotPage() {
 
   const generateBotResponse = async (input) => {
     try {
-      const response = await axios.post('http://127.0.0.1:5000/chat', {
-        query: input, // Changed "message" to "query"
-      });
+      const response = await axios.post(
+        '/api/chat',
+        { query: input }
+      );
       return { sender: 'bot', text: response.data.response };
     } catch (error) {
       console.error("Error fetching data: ", error);
