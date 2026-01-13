@@ -58,15 +58,17 @@ export default function ChatbotPage() {
   const generateBotResponse = async (input) => {
     try {
       const response = await axios.post(
-        '/api/chat',
-        { query: input }
+        '/api',
+        { query: input },
+        { headers: { "Content-Type": "application/json" } } // optional
       );
       return { sender: 'bot', text: response.data.response };
     } catch (error) {
       console.error("Error fetching data: ", error);
-      return { sender: 'bot', text: "Sorry, something went wrong." }; // Fallback response
+      return { sender: 'bot', text: "Sorry, something went wrong." };
     }
   };
+
 
   const startNewChat = () => {
     setChatLogs((prevLogs) => {
