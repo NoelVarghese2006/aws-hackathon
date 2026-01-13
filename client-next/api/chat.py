@@ -23,7 +23,7 @@ model = genai.GenerativeModel("gemini-1.5-pro")
 # -------------------------
 # Routes
 # -------------------------
-@app.route("/chat", methods=["POST"])
+@app.route("/", methods=["POST"])
 def chat():
     data = request.json or {}
     query = data.get("query", "")
