@@ -1,39 +1,41 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import google.generativeai as genai
-import logging
+import json
 import os
+import google.generativeai as genai
 
-# -------------------------
-# App setup
-# -------------------------
-app = Flask(__name__)
-CORS(app)
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# -------------------------
-# Gemini setup
-# -------------------------
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-
 model = genai.GenerativeModel("gemini-1.5-pro")
 
-# -------------------------
-# Routes
-# -------------------------
-@app.route("/", methods=["POST"])
-def chat():
-    data = request.json or {}
-    query = data.get("query", "")
-
-    if not query.strip():
-        return jsonify({"response": ""})
+def handler(request):
+    if request.method != "POST":
+        return {
+            "statusCode": 405,
+            "body": json.dumps({"error": "Method not allowed"})
+        }
 
     try:
+        body = json.loads(request.body or "{}")
+        query = body.get("query", "").strip()
+
+        if not query:
+            return {
+                "statusCode": 200,
+                "body": json.dumps({"response": ""})
+            }
+
         response = model.generate_content(query)
-        return jsonify({"response": response.text})
+
+        return {
+            "statusCode": 200,
+            "headers": {
+                "Content-Type": "application/json"
+            },
+            "body": json.dumps({
+                "response": response.text
+            })
+        }
+
     except Exception as e:
-        logger.exception("Gemini error")
-        return jsonify({"error": "Generation failed"}), 500
+        return {
+            "statusCode": 500,
+            "body": json.dumps({"error": str(e)})
+        }
