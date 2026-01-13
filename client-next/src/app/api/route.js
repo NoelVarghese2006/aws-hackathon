@@ -1,29 +1,33 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import genai from "google-generativeai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-genai.configure({
-  apiKey: process.env.GEMINI_API_KEY,
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
-const model = new genai.GenerativeModel("gemini-1.5-pro");
-
-export default async function handler(req = NextApiRequest, res = NextApiResponse) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
+export async function POST(req) {
   try {
-    const { query } = req.body || {};
+    const body = await req.json();
+    const { query } = body || {};
 
     if (!query || !query.trim()) {
-      return res.status(200).json({ response: "" });
+      return new Response(JSON.stringify({ response: "" }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
     }
 
-    // Generate content
-    const response = await model.generate_content(query);
+    const result = await model.generateContent(query);
 
-    return res.status(200).json({ response: response.text });
+    // `result.response.text()` may be a function in some SDK versions.
+    const text = typeof result?.response?.text === "function" ? result.response.text() : result?.response?.text || "";
+
+    return new Response(JSON.stringify({ response: text }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
   } catch (error) {
-    return res.status(500).json({ error: error.message || "Something went wrong" });
+    return new Response(JSON.stringify({ error: error?.message || "Something went wrong" }), {
+      status: 500,
+      headers: { "content-type": "application/json" },
+    });
   }
 }
